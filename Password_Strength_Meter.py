@@ -4,10 +4,6 @@ import random
 import string
 import pandas as pd
 from datetime import datetime, timedelta
-import matplotlib.pyplot as plt
-
-# Configure matplotlib to use a non-interactive backend
-plt.switch_backend('Agg')
 
 # Function to check password strength
 def check_password_strength(password):
@@ -98,15 +94,11 @@ def main():
 
     # Sidebar for navigation
     st.sidebar.title("Navigation")
-    option = st.sidebar.radio("Choose an option:", ["Check Password Strength", "Generate Password", "Password History", "Export Passwords", "Password Expiry Dashboard"])
+    option = st.sidebar.radio("Choose an option:", ["Check Password Strength", "Generate Password", "Password History", "Export Passwords"])
 
     # Initialize session state for password history
     if "password_history" not in st.session_state:
         st.session_state.password_history = []
-
-    # Initialize session state for expiry reminders
-    if "expiry_reminders" not in st.session_state:
-        st.session_state.expiry_reminders = []
 
     # Check Password Strength
     if option == "Check Password Strength":
@@ -186,56 +178,6 @@ def main():
             export_passwords(passwords)
         else:
             st.write("No passwords to export.")
-
-    # Password Expiry Dashboard
-    elif option == "Password Expiry Dashboard":
-        st.subheader("Password Expiry Dashboard")
-
-        # Add a new expiry reminder
-        st.write("### Set a New Expiry Reminder")
-        reminder_name = st.text_input("Enter a name for the reminder (e.g., 'Email Password'):")
-        expiry_date = st.date_input("Set Expiry Date", datetime.now() + timedelta(days=90))
-        
-        if st.button("Add Reminder"):
-            st.session_state.expiry_reminders.append({
-                "name": reminder_name,
-                "expiry_date": expiry_date,  # Already a datetime.date object
-                "set_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            })
-            st.success(f"✅ Reminder added for {reminder_name} on {expiry_date}.")
-
-        # Display all expiry reminders
-        st.write("### Your Expiry Reminders")
-        if st.session_state.expiry_reminders:
-            reminders_df = pd.DataFrame(st.session_state.expiry_reminders)
-            st.write(reminders_df)
-
-            # Visualize expiry reminders
-            st.write("### Expiry Reminders Timeline")
-            fig, ax = plt.subplots(figsize=(10, 6))
-            
-            # Sort reminders by days remaining
-            for reminder in sorted(st.session_state.expiry_reminders, 
-                             key=lambda x: (x["expiry_date"] - datetime.now().date()).days):
-                # Calculate days remaining directly using datetime.date objects
-                days_remaining = (reminder["expiry_date"] - datetime.now().date()).days
-                ax.barh(reminder["name"], days_remaining, 
-                   color="red" if days_remaining < 7 else "orange" if days_remaining < 30 else "skyblue")
-        
-            ax.set_xlabel("Days Remaining")
-            ax.set_title("Password Expiry Timeline")
-            ax.grid(True, axis='x', linestyle='--', alpha=0.7)
-        
-            # Add value labels on bars
-            for i, v in enumerate(ax.patches):
-                ax.text(v.get_width(), v.get_y() + v.get_height()/2, 
-                   f'{int(v.get_width())} days', 
-                   va='center')
-        
-            st.pyplot(fig)
-            plt.close(fig)  # Clean up the figure
-        else:
-            st.write("No expiry reminders set yet.")
 
 if __name__ == "__main__":
     main()
