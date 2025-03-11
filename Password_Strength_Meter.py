@@ -6,6 +6,9 @@ import pandas as pd
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 
+# Configure matplotlib to use a non-interactive backend
+plt.switch_backend('Agg')
+
 # Function to check password strength
 def check_password_strength(password):
     score = 0
